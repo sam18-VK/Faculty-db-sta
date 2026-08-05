@@ -1,7 +1,0 @@
-﻿__pycache__/
-*.pyc
-venv/
-.venv/
-faculty.db
-.DS_Store
-*.swp
