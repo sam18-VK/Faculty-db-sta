@@ -1,0 +1,28 @@
+:root {
+  --brand: #2f4b7c;
+  --brand-dark: #1f3357;
+}
+body {
+  background-color: #f4f6f9;
+}
+.app-navbar {
+  background: linear-gradient(90deg, var(--brand), var(--brand-dark));
+}
+.stat-card {
+  border: none;
+  border-left: 4px solid var(--brand);
+}
+.card-header {
+  background-color: #fff;
+  border-bottom: 1px solid #eef0f3;
+}
+.dept-badge {
+  color: #fff;
+  padding: 0.4em 0.7em;
+}
+.dept-science { background-color: #2e7d32; }
+.dept-technology { background-color: #1565c0; }
+.dept-architecture { background-color: #b8860b; }
+footer {
+  border-top: 1px solid #e5e7eb;
+}

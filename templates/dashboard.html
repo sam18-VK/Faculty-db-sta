@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card stat-card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Total Faculty</div>
+        <div class="display-6 fw-bold">{{ total_faculty }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Departments</div>
+        <div class="display-6 fw-bold">{{ dept_counts|length }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card stat-card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Courses Offered</div>
+        <div class="display-6 fw-bold">{{ total_courses }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="card-header fw-semibold">Faculty by Department</div>
+  <div class="card-body">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr><th>Department</th><th class="text-end">Faculty Count</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for dept_id, name, cnt in dept_counts %}
+        <tr>
+          <td>{{ name }}</td>
+          <td class="text-end">{{ cnt }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('faculty_list') }}?department_id={{ dept_id }}">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

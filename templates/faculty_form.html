@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}{% if faculty %}Edit Faculty{% else %}Add Faculty{% endif %}{% endblock %}
+{% block content %}
+<h2 class="mb-4">{% if faculty %}Edit Faculty{% else %}Add New Faculty{% endif %}</h2>
+
+<form method="post" action="{{ form_action }}" class="card shadow-sm p-4">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">Full Name *</label>
+      <input type="text" class="form-control" name="name" required value="{{ faculty.name if faculty else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Department *</label>
+      <select class="form-select" name="department_id" required>
+        <option value="">Select department</option>
+        {% for d in departments %}
+        <option value="{{ d.department_id }}" {% if faculty and faculty.department_id == d.department_id %}selected{% endif %}>{{ d.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Designation *</label>
+      <select class="form-select" name="designation" required>
+        <option value="">Select designation</option>
+        {% for des in designations %}
+        <option value="{{ des }}" {% if faculty and faculty.designation == des %}selected{% endif %}>{{ des }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-control" name="email" value="{{ faculty.email if faculty else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Phone</label>
+      <input type="text" class="form-control" name="phone" value="{{ faculty.phone if faculty else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Joining Date</label>
+      <input type="date" class="form-control" name="joining_date" value="{{ faculty.joining_date if faculty else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Qualification</label>
+      <input type="text" class="form-control" name="qualification" value="{{ faculty.qualification if faculty else '' }}">
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Specialization</label>
+      <input type="text" class="form-control" name="specialization" value="{{ faculty.specialization if faculty else '' }}">
+    </div>
+    <div class="col-12">
+      <label class="form-label">Courses Taught</label>
+      <div class="row">
+        {% for c in all_courses %}
+        <div class="col-md-4 form-check ms-2">
+          <input class="form-check-input" type="checkbox" name="course_ids" value="{{ c.course_id }}" id="course{{ c.course_id }}"
+            {% if c.course_id in assigned_course_ids %}checked{% endif %}>
+          <label class="form-check-label" for="course{{ c.course_id }}">{{ c.name }} ({{ c.code }})</label>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <button type="submit" class="btn btn-primary">{% if faculty %}Save Changes{% else %}Add Faculty{% endif %}</button>
+    <a href="{{ url_for('faculty_list') }}" class="btn btn-link">Cancel</a>
+  </div>
+</form>
+{% endblock %}

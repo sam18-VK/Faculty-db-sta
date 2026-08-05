@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ faculty.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <h2 class="mb-0">{{ faculty.name }}</h2>
+    <span class="badge dept-badge dept-{{ faculty.department_name|lower }} mt-2">{{ faculty.department_name }}</span>
+    <span class="text-muted ms-2">{{ faculty.designation }}</span>
+  </div>
+  <div>
+    <a href="{{ url_for('faculty_edit', faculty_id=faculty.faculty_id) }}" class="btn btn-outline-secondary">Edit</a>
+    <form action="{{ url_for('faculty_delete', faculty_id=faculty.faculty_id) }}" method="post" class="d-inline"
+          onsubmit="return confirm('Delete this faculty record? This cannot be undone.');">
+      <button class="btn btn-outline-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-semibold">Contact & Qualification</div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item"><strong>Email:</strong> {{ faculty.email or "—" }}</li>
+        <li class="list-group-item"><strong>Phone:</strong> {{ faculty.phone or "—" }}</li>
+        <li class="list-group-item"><strong>Qualification:</strong> {{ faculty.qualification or "—" }}</li>
+        <li class="list-group-item"><strong>Specialization:</strong> {{ faculty.specialization or "—" }}</li>
+        <li class="list-group-item"><strong>Joining Date:</strong> {{ faculty.joining_date|dateformat }}</li>
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-semibold">Courses Taught</div>
+      <ul class="list-group list-group-flush">
+        {% for c in courses %}
+        <li class="list-group-item">{{ c.name }} <span class="text-muted">({{ c.code }})</span></li>
+        {% else %}
+        <li class="list-group-item text-muted">No courses assigned.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<a href="{{ url_for('faculty_list') }}" class="btn btn-link mt-3 ps-0">&larr; Back to Faculty Directory</a>
+{% endblock %}

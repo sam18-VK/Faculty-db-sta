@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Courses{% endblock %}
+{% block content %}
+<h2 class="mb-4">Courses / Subjects</h2>
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr><th>Code</th><th>Course Name</th><th>Department</th><th class="text-end">Faculty Assigned</th></tr>
+      </thead>
+      <tbody>
+        {% for c in courses %}
+        <tr>
+          <td>{{ c.code }}</td>
+          <td>{{ c.name }}</td>
+          <td><span class="badge dept-badge dept-{{ c.department_name|lower }}">{{ c.department_name }}</span></td>
+          <td class="text-end">{{ c.faculty_count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
