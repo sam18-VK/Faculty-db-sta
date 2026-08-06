@@ -16,13 +16,13 @@ body {
   background-color: #fff;
   border-bottom: 1px solid #eef0f3;
 }
+/* Colour is set inline per-department by the dept_color template filter.
+   The fallback here keeps badges readable if that ever returns nothing. */
 .dept-badge {
   color: #fff;
   padding: 0.4em 0.7em;
+  background-color: #5a6570;
 }
-.dept-science { background-color: #2e7d32; }
-.dept-technology { background-color: #1565c0; }
-.dept-architecture { background-color: #b8860b; }
 footer {
   border-top: 1px solid #e5e7eb;
 }

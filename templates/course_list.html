@@ -1,24 +1,44 @@
 {% extends "base.html" %}
 {% block title %}Courses{% endblock %}
 {% block content %}
-<h2 class="mb-4">Courses / Subjects</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Courses / Subjects</h2>
+  <a href="{{ url_for('course_add') }}" class="btn btn-primary">+ Add Course</a>
+</div>
+
 <div class="card shadow-sm">
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
       <thead class="table-light">
-        <tr><th>Code</th><th>Course Name</th><th>Department</th><th class="text-end">Faculty Assigned</th></tr>
+        <tr>
+          <th>Code</th>
+          <th>Course Name</th>
+          <th>Department</th>
+          <th class="text-end">Faculty Assigned</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
         {% for c in courses %}
         <tr>
           <td>{{ c.code }}</td>
-          <td>{{ c.name }}</td>
-          <td><span class="badge dept-badge dept-{{ c.department_name|lower }}">{{ c.department_name }}</span></td>
+          <td class="fw-semibold">{{ c.name }}</td>
+          <td><span class="badge dept-badge" style="background-color: {{ c.department_name|dept_color }}">{{ c.department_name }}</span></td>
           <td class="text-end">{{ c.faculty_count }}</td>
+          <td class="text-end text-nowrap">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('course_edit', course_id=c.course_id) }}">Edit</a>
+            <form action="{{ url_for('course_delete', course_id=c.course_id) }}" method="post" class="d-inline"
+                  onsubmit="return confirm('Delete course {{ c.name }}?');">
+              <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+            </form>
+          </td>
         </tr>
+        {% else %}
+        <tr><td colspan="5" class="text-center text-muted py-4">No courses yet.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+<p class="text-muted small mt-3">A course can only be deleted once no faculty are assigned to it.</p>
 {% endblock %}

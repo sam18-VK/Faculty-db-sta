@@ -1,0 +1,15 @@
+# Render deployment config. Render reads this automatically when you connect
+# the repo, so you don't have to fill in build/start commands by hand.
+services:
+  - type: web
+    name: faculty-db-sta
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      # Render generates a strong random value and keeps it secret.
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.12.10"

@@ -15,10 +15,15 @@ from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for, flash, g
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-DATABASE = os.path.join(BASE_DIR, "faculty.db")
+# DATABASE_PATH lets the deployment decide where the database lives. On Render's
+# free tier the filesystem is ephemeral, so this stays inside the project; once a
+# persistent disk is attached, point it at e.g. /var/data/faculty.db instead.
+DATABASE = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "faculty.db"))
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "dev-secret-key-change-in-production"
+# In production set SECRET_KEY as an environment variable. The fallback below
+# exists only so the app still runs out-of-the-box during local development.
+app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-insecure-key")
 app.config["DATABASE"] = DATABASE
 
 DESIGNATIONS = [
@@ -374,6 +379,211 @@ def faculty_delete(faculty_id):
     return redirect(url_for("faculty_list"))
 
 
+# ---------------------------------------------------------------------------
+# Department management
+# ---------------------------------------------------------------------------
+@app.route("/departments")
+def department_list():
+    db = get_db()
+    departments = db.execute(
+        """SELECT d.*,
+                  (SELECT COUNT(*) FROM faculty f WHERE f.department_id = d.department_id) AS faculty_count,
+                  (SELECT COUNT(*) FROM course c WHERE c.department_id = d.department_id) AS course_count
+           FROM department d ORDER BY d.name"""
+    ).fetchall()
+    return render_template("department_list.html", departments=departments)
+
+
+@app.route("/departments/add", methods=["GET", "POST"])
+def department_add():
+    db = get_db()
+    if request.method == "POST":
+        form = request.form
+        try:
+            db.execute(
+                "INSERT INTO department (name, code, description) VALUES (?, ?, ?)",
+                (
+                    form["name"].strip(),
+                    form["code"].strip().upper(),
+                    form.get("description", "").strip(),
+                ),
+            )
+            db.commit()
+            flash(f"Department '{form['name']}' added successfully.", "success")
+            return redirect(url_for("department_list"))
+        except sqlite3.IntegrityError:
+            flash("A department with that name or code already exists.", "danger")
+
+    return render_template(
+        "department_form.html",
+        department=None,
+        form_action=url_for("department_add"),
+    )
+
+
+@app.route("/departments/<int:department_id>/edit", methods=["GET", "POST"])
+def department_edit(department_id):
+    db = get_db()
+    department = db.execute(
+        "SELECT * FROM department WHERE department_id = ?", (department_id,)
+    ).fetchone()
+    if department is None:
+        flash("Department not found.", "danger")
+        return redirect(url_for("department_list"))
+
+    if request.method == "POST":
+        form = request.form
+        try:
+            db.execute(
+                "UPDATE department SET name=?, code=?, description=? WHERE department_id=?",
+                (
+                    form["name"].strip(),
+                    form["code"].strip().upper(),
+                    form.get("description", "").strip(),
+                    department_id,
+                ),
+            )
+            db.commit()
+            flash(f"Department '{form['name']}' updated successfully.", "success")
+            return redirect(url_for("department_list"))
+        except sqlite3.IntegrityError:
+            flash("A department with that name or code already exists.", "danger")
+
+    return render_template(
+        "department_form.html",
+        department=department,
+        form_action=url_for("department_edit", department_id=department_id),
+    )
+
+
+@app.route("/departments/<int:department_id>/delete", methods=["POST"])
+def department_delete(department_id):
+    db = get_db()
+    department = db.execute(
+        "SELECT name FROM department WHERE department_id = ?", (department_id,)
+    ).fetchone()
+    if department is None:
+        flash("Department not found.", "danger")
+        return redirect(url_for("department_list"))
+
+    # Refuse to delete while records still depend on this department, rather
+    # than silently cascading away faculty and course rows.
+    faculty_count = db.execute(
+        "SELECT COUNT(*) FROM faculty WHERE department_id = ?", (department_id,)
+    ).fetchone()[0]
+    course_count = db.execute(
+        "SELECT COUNT(*) FROM course WHERE department_id = ?", (department_id,)
+    ).fetchone()[0]
+
+    if faculty_count or course_count:
+        flash(
+            f"Cannot delete '{department['name']}' — it still has "
+            f"{faculty_count} faculty and {course_count} course(s). "
+            "Reassign or remove those first.",
+            "danger",
+        )
+        return redirect(url_for("department_list"))
+
+    db.execute("DELETE FROM department WHERE department_id = ?", (department_id,))
+    db.commit()
+    flash(f"Department '{department['name']}' deleted.", "success")
+    return redirect(url_for("department_list"))
+
+
+# ---------------------------------------------------------------------------
+# Course management
+# ---------------------------------------------------------------------------
+@app.route("/courses/add", methods=["GET", "POST"])
+def course_add():
+    db = get_db()
+    departments = db.execute("SELECT * FROM department ORDER BY name").fetchall()
+
+    if request.method == "POST":
+        form = request.form
+        try:
+            db.execute(
+                "INSERT INTO course (name, code, department_id) VALUES (?, ?, ?)",
+                (
+                    form["name"].strip(),
+                    form["code"].strip().upper(),
+                    form["department_id"],
+                ),
+            )
+            db.commit()
+            flash(f"Course '{form['name']}' added successfully.", "success")
+            return redirect(url_for("course_list"))
+        except sqlite3.IntegrityError:
+            flash("A course with that code already exists.", "danger")
+
+    return render_template(
+        "course_form.html",
+        course=None,
+        departments=departments,
+        form_action=url_for("course_add"),
+    )
+
+
+@app.route("/courses/<int:course_id>/edit", methods=["GET", "POST"])
+def course_edit(course_id):
+    db = get_db()
+    course = db.execute("SELECT * FROM course WHERE course_id = ?", (course_id,)).fetchone()
+    if course is None:
+        flash("Course not found.", "danger")
+        return redirect(url_for("course_list"))
+
+    departments = db.execute("SELECT * FROM department ORDER BY name").fetchall()
+
+    if request.method == "POST":
+        form = request.form
+        try:
+            db.execute(
+                "UPDATE course SET name=?, code=?, department_id=? WHERE course_id=?",
+                (
+                    form["name"].strip(),
+                    form["code"].strip().upper(),
+                    form["department_id"],
+                    course_id,
+                ),
+            )
+            db.commit()
+            flash(f"Course '{form['name']}' updated successfully.", "success")
+            return redirect(url_for("course_list"))
+        except sqlite3.IntegrityError:
+            flash("A course with that code already exists.", "danger")
+
+    return render_template(
+        "course_form.html",
+        course=course,
+        departments=departments,
+        form_action=url_for("course_edit", course_id=course_id),
+    )
+
+
+@app.route("/courses/<int:course_id>/delete", methods=["POST"])
+def course_delete(course_id):
+    db = get_db()
+    course = db.execute("SELECT name FROM course WHERE course_id = ?", (course_id,)).fetchone()
+    if course is None:
+        flash("Course not found.", "danger")
+        return redirect(url_for("course_list"))
+
+    assigned = db.execute(
+        "SELECT COUNT(*) FROM faculty_course WHERE course_id = ?", (course_id,)
+    ).fetchone()[0]
+    if assigned:
+        flash(
+            f"Cannot delete '{course['name']}' — {assigned} faculty member(s) "
+            "are still assigned to it. Unassign them first.",
+            "danger",
+        )
+        return redirect(url_for("course_list"))
+
+    db.execute("DELETE FROM course WHERE course_id = ?", (course_id,))
+    db.commit()
+    flash(f"Course '{course['name']}' deleted.", "success")
+    return redirect(url_for("course_list"))
+
+
 @app.route("/courses")
 def course_list():
     db = get_db()
@@ -386,6 +596,32 @@ def course_list():
     return render_template("course_list.html", courses=courses)
 
 
+# Stable colours for the seeded departments; anything created later gets a
+# colour picked deterministically from the palette, so new departments always
+# render a visible badge instead of white-on-white.
+DEPT_COLORS = {
+    "science": "#2e7d32",
+    "technology": "#1565c0",
+    "architecture": "#b8860b",
+}
+_DEPT_PALETTE = [
+    "#6a1b9a", "#00838f", "#c62828", "#4e342e",
+    "#37474f", "#ad1457", "#558b2f", "#ef6c00",
+]
+
+
+@app.template_filter("dept_color")
+def dept_color(name):
+    """Return a hex colour for a department name."""
+    if not name:
+        return "#5a6570"
+    key = str(name).strip().lower()
+    if key in DEPT_COLORS:
+        return DEPT_COLORS[key]
+    # sum of code points keeps this stable across restarts, unlike hash()
+    return _DEPT_PALETTE[sum(ord(ch) for ch in key) % len(_DEPT_PALETTE)]
+
+
 @app.template_filter("dateformat")
 def dateformat(value):
     if not value:
@@ -396,7 +632,16 @@ def dateformat(value):
         return value
 
 
+# Create and seed the database on import. A WSGI server such as gunicorn
+# imports `app` directly and never executes the __main__ block below, so this
+# has to happen here. Both calls are idempotent: init_db uses CREATE TABLE IF
+# NOT EXISTS, and seed_db returns early once any department exists.
+init_db()
+seed_db()
+
+
 if __name__ == "__main__":
-    init_db()
-    seed_db()
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    # Debug mode is opt-in: set FLASK_DEBUG=1 locally. It must stay off in
+    # production, where it would expose an interactive console on errors.
+    debug = os.environ.get("FLASK_DEBUG") == "1"
+    app.run(debug=debug, host="127.0.0.1", port=5000)

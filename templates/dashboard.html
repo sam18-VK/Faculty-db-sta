@@ -31,7 +31,10 @@
 </div>
 
 <div class="card shadow-sm">
-  <div class="card-header fw-semibold">Faculty by Department</div>
+  <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+    <span>Faculty by Department</span>
+    <a href="{{ url_for('department_list') }}" class="btn btn-sm btn-outline-secondary">Manage Departments</a>
+  </div>
   <div class="card-body">
     <table class="table table-hover align-middle mb-0">
       <thead>

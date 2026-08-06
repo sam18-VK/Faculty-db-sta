@@ -4,7 +4,7 @@
 <div class="d-flex justify-content-between align-items-start mb-3">
   <div>
     <h2 class="mb-0">{{ faculty.name }}</h2>
-    <span class="badge dept-badge dept-{{ faculty.department_name|lower }} mt-2">{{ faculty.department_name }}</span>
+    <span class="badge dept-badge mt-2" style="background-color: {{ faculty.department_name|dept_color }}">{{ faculty.department_name }}</span>
     <span class="text-muted ms-2">{{ faculty.designation }}</span>
   </div>
   <div>

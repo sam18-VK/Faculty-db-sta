@@ -45,7 +45,7 @@
         {% for f in faculty_rows %}
         <tr>
           <td><a href="{{ url_for('faculty_detail', faculty_id=f.faculty_id) }}" class="fw-semibold text-decoration-none">{{ f.name }}</a></td>
-          <td><span class="badge dept-badge dept-{{ f.department_name|lower }}">{{ f.department_name }}</span></td>
+          <td><span class="badge dept-badge" style="background-color: {{ f.department_name|dept_color }}">{{ f.department_name }}</span></td>
           <td>{{ f.designation }}</td>
           <td>{{ f.email }}</td>
           <td>{{ f.specialization }}</td>
