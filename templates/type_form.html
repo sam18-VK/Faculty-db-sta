@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% if record_type %}Edit Data Set{% else %}New Data Set{% endif %}{% endblock %}
 {% block content %}
-<h2 class="mb-4">{% if record_type %}Edit Data Set{% else %}Create a New Data Set{% endif %}</h2>
+<h2 class="page-title mb-4">{% if record_type %}Edit Data Set{% else %}Create a New Data Set{% endif %}</h2>
 
 <form method="post" action="{{ form_action }}" class="card shadow-sm p-4">
   <div class="mb-3">

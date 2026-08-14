@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Relationships{% endblock %}
 {% block content %}
-<h2 class="mb-2">Relationships</h2>
+<h2 class="page-title mb-2">Relationships</h2>
 <p class="text-muted">
   A relationship links two data sets and fixes how many records may sit on each side.
   The cardinality you choose is enforced whenever records are linked — not just recorded.
@@ -12,7 +12,7 @@
     <div class="card shadow-sm">
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
-          <thead class="table-light">
+          <thead>
             <tr><th>Name</th><th>From → To</th><th>Cardinality</th><th class="text-end">Links</th><th></th></tr>
           </thead>
           <tbody>
@@ -20,7 +20,7 @@
             <tr>
               <td class="fw-semibold">{{ r.name }}</td>
               <td>{{ r.from_name }} → {{ r.to_name }}</td>
-              <td><span class="badge bg-info text-dark">{{ cardinality_labels[r.cardinality] }}</span></td>
+              <td><span class="badge card-badge">{{ cardinality_labels[r.cardinality] }}</span></td>
               <td class="text-end">{{ r.link_count }}</td>
               <td class="text-end">
                 <form action="{{ url_for('relationship_delete', rel_id=r.rel_id) }}" method="post" class="d-inline"

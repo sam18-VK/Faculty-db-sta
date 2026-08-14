@@ -2,7 +2,7 @@
 {% block title %}Data Sets{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-2">
-  <h2 class="mb-0">Data Sets</h2>
+  <h2 class="page-title mb-0">Data Sets</h2>
   <a href="{{ url_for('type_add') }}" class="btn btn-primary">+ New Data Set</a>
 </div>
 <p class="text-muted">Each data set is a table you design yourself — choose its fields, then start entering records.</p>
@@ -10,7 +10,7 @@
 <div class="card shadow-sm">
   <div class="table-responsive">
     <table class="table table-hover align-middle mb-0">
-      <thead class="table-light">
+      <thead>
         <tr><th>Name</th><th>Description</th><th class="text-end">Fields</th><th class="text-end">Records</th><th></th></tr>
       </thead>
       <tbody>

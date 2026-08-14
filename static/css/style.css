@@ -1,145 +1,237 @@
-:root {
-  --bg: #0F172A;
-  --bg-elevated: #111c30;
-  --card-bg: #1E293B;
-  --card-border: #27334a;
-  --accent-cyan: #06B6D4;
-  --accent-purple: #8B5CF6;
-  --accent-green: #10B981;
-  --text: #F8FAFC;
-  --text-muted: #94A3B8;
+/* ==========================================================================
+   apexdata.in — dark theme
+   --------------------------------------------------------------------------
+   The palette is declared explicitly and `color-scheme: dark` is set on the
+   root, which stops browsers (Edge in particular) from applying their own
+   automatic dark-mode inversion on top. Auto-inversion is what washes muted
+   text out to near-invisible grey.
+   ========================================================================== */
 
-  /* Tie a couple of Bootstrap variables to our palette so components
-     we don't explicitly style (badges, alerts, focus rings) still match. */
-  --bs-primary: var(--accent-purple);
-  --bs-body-bg: var(--bg);
-  --bs-body-color: var(--text);
+:root {
+  color-scheme: dark;
+
+  /* Surfaces, from deepest to most raised */
+  --bg:            #151c26;   /* page background */
+  --surface:       #1c2430;   /* cards, tables */
+  --surface-raise: #232d3b;   /* hovers, table headers */
+  --sidebar:       #111821;
+
+  --border:        #2c3746;
+  --border-soft:   #232e3c;
+
+  /* Text — muted stays deliberately readable rather than faded out */
+  --text:          #e7edf5;
+  --text-muted:    #94a3b8;
+  --text-dim:      #6b7a8d;
+
+  /* Muted gold reads more considered than a saturated blue */
+  --accent:        #c9a227;
+  --accent-soft:   #d9b955;
+  --link:          #7fb2e8;
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
+  min-height: 100vh;
 }
 
-/* ---------- Navbar ---------- */
-.app-navbar {
-  background: linear-gradient(90deg, #0B1220, #16213a);
-  border-bottom: 1px solid var(--card-border);
+/* ------------------------------ Layout ---------------------------------- */
+
+.layout {
+  display: flex;
+  min-height: 100vh;
 }
-.app-navbar .navbar-brand {
+
+.sidebar {
+  width: 250px;
+  flex: 0 0 250px;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border-soft);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.content {
+  flex: 1 1 auto;
+  min-width: 0;               /* lets wide tables scroll instead of overflowing */
+  padding: 2rem 2.25rem 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  padding: 1.4rem 1.25rem 1.1rem;
+  border-bottom: 1px solid var(--border-soft);
+  text-decoration: none;
+}
+.brand-name {
+  font-size: 1.2rem;
+  font-weight: 600;
   color: var(--text);
+  letter-spacing: .2px;
 }
-.app-navbar .nav-link {
+.brand-mark { color: var(--accent); font-size: 1.15rem; }
+
+.side-nav { padding: .85rem .7rem; flex: 1 1 auto; overflow-y: auto; }
+.side-label {
+  font-size: .68rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: .85rem .6rem .4rem;
+}
+.side-link {
+  display: block;
+  padding: .55rem .75rem;
+  margin-bottom: 2px;
+  border-radius: 6px;
   color: var(--text-muted);
-  transition: color 0.15s ease;
+  text-decoration: none;
+  font-size: .93rem;
+  border-left: 2px solid transparent;
 }
-.app-navbar .nav-link:hover,
-.app-navbar .nav-link.active {
-  color: var(--accent-cyan);
-}
-.app-navbar .btn-light {
-  background-color: var(--accent-purple);
-  border-color: var(--accent-purple);
-  color: #fff;
-}
-.app-navbar .btn-light:hover {
-  background-color: #7c4de0;
-  border-color: #7c4de0;
-}
-
-/* ---------- Cards / stat cards ---------- */
-.card,
-.stat-card {
-  background-color: var(--card-bg);
-  border: 1px solid var(--card-border);
+.side-link:hover { background: var(--surface-raise); color: var(--text); }
+.side-link.active {
+  background: var(--surface-raise);
   color: var(--text);
+  border-left-color: var(--accent);
+  font-weight: 500;
 }
-.stat-card {
-  border-left: 4px solid var(--accent-cyan);
-  box-shadow: 0 0 24px rgba(6, 182, 212, 0.06);
-}
-/* Give every 2nd/3rd stat card a slightly different accent so the row reads
-   as distinct metrics rather than three copies of the same card. */
-.stat-card:nth-of-type(2) { border-left-color: var(--accent-purple); }
-.stat-card:nth-of-type(3) { border-left-color: var(--accent-green); }
 
+.side-foot {
+  border-top: 1px solid var(--border-soft);
+  padding: .9rem 1.25rem 1.1rem;
+}
+.side-foot .inst {
+  font-size: .78rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+.side-foot .who { color: var(--text); font-size: .88rem; font-weight: 500; }
+
+/* Collapse to a normal stacked bar on small screens */
+@media (max-width: 991.98px) {
+  .layout { flex-direction: column; }
+  .sidebar { width: 100%; flex: none; height: auto; position: static; flex-direction: column; }
+  .side-nav { display: flex; flex-wrap: wrap; gap: .25rem; }
+  .side-label { display: none; }
+  .side-link { border-left: 0; border-bottom: 2px solid transparent; }
+  .side-link.active { border-left: 0; border-bottom-color: var(--accent); }
+  .content { padding: 1.25rem; }
+}
+
+/* ------------------------------ Components ------------------------------ */
+
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
 .card-header {
-  background-color: var(--bg-elevated);
-  border-bottom: 1px solid var(--card-border);
+  background-color: transparent;
+  border-bottom: 1px solid var(--border);
   color: var(--text);
+  padding: .85rem 1.15rem;
+}
+.card-footer { background-color: transparent; border-top: 1px solid var(--border); }
+
+.stat-card { border-left: 3px solid var(--accent); }
+.stat-card .display-6 { color: var(--text); font-weight: 600; }
+.stat-label {
+  font-size: .7rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--text-muted);   /* readable, unlike Bootstrap's default muted */
 }
 
-/* ---------- Tables ---------- */
 .table {
   --bs-table-bg: transparent;
   --bs-table-color: var(--text);
-  --bs-table-border-color: var(--card-border);
+  --bs-table-border-color: var(--border-soft);
+  --bs-table-hover-bg: var(--surface-raise);
+  --bs-table-hover-color: var(--text);
+  margin-bottom: 0;
 }
-.table-hover > tbody > tr:hover > * {
-  background-color: rgba(6, 182, 212, 0.06);
+.table > thead th {
+  background-color: var(--surface-raise);
+  color: var(--text-muted);
+  font-size: .72rem;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
 }
 
-/* ---------- Forms ---------- */
-.form-control,
-.form-select {
-  background-color: var(--bg-elevated);
-  border: 1px solid var(--card-border);
+.form-control, .form-select {
+  background-color: #131a23;
+  border-color: var(--border);
   color: var(--text);
 }
-.form-control:focus,
-.form-select:focus {
-  background-color: var(--bg-elevated);
+.form-control:focus, .form-select:focus {
+  background-color: #131a23;
+  border-color: var(--accent);
   color: var(--text);
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 0 0.2rem rgba(6, 182, 212, 0.25);
+  box-shadow: 0 0 0 .2rem rgba(201, 162, 39, .15);
 }
-.form-control::placeholder {
-  color: var(--text-muted);
-}
-.form-label {
-  color: var(--text-muted);
+.form-control::placeholder { color: var(--text-dim); }
+.form-label { color: var(--text-muted); font-size: .88rem; font-weight: 500; }
+.form-text { color: var(--text-dim); }
+
+.list-group-item {
+  background-color: transparent;
+  border-color: var(--border-soft);
+  color: var(--text);
 }
 
-/* ---------- Buttons ---------- */
+/* Bootstrap's .text-muted is too faint on this background */
+.text-muted { color: var(--text-muted) !important; }
+a { color: var(--link); }
+a:hover { color: #a6cbf2; }
+
 .btn-primary {
-  background-color: var(--accent-purple);
-  border-color: var(--accent-purple);
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: #1a1408;
+  font-weight: 600;
 }
-.btn-primary:hover {
-  background-color: #7c4de0;
-  border-color: #7c4de0;
+.btn-primary:hover, .btn-primary:focus {
+  background-color: var(--accent-soft);
+  border-color: var(--accent-soft);
+  color: #1a1408;
 }
-.btn-outline-primary {
-  color: var(--accent-cyan);
-  border-color: var(--accent-cyan);
-}
-.btn-outline-primary:hover {
-  background-color: var(--accent-cyan);
-  border-color: var(--accent-cyan);
-  color: #0F172A;
-}
+.btn-outline-secondary { color: var(--text-muted); border-color: var(--border); }
+.btn-outline-secondary:hover { background-color: var(--surface-raise); color: var(--text); border-color: var(--text-dim); }
+.btn-outline-primary { color: var(--accent-soft); border-color: rgba(201,162,39,.5); }
+.btn-outline-primary:hover { background-color: var(--accent); border-color: var(--accent); color: #1a1408; }
+.btn-link { color: var(--link); }
 
-/* ---------- Department badges ----------
-   Colour is set inline per-department by the dept_color template filter.
-   The fallback here keeps badges readable if that ever returns nothing. */
 .dept-badge {
   color: #fff;
-  padding: 0.4em 0.7em;
-  background-color: #334155;
-  border-radius: 0.375rem;
+  padding: .4em .7em;
+  font-weight: 600;
+  background-color: #5a6570;   /* fallback; real colour is set inline */
 }
 
-/* ---------- Links ---------- */
-a {
-  color: var(--accent-cyan);
-}
-a:hover {
-  color: #38d4ee;
-}
+.alert { border: 1px solid transparent; }
+.alert-success { background-color: rgba(37, 120, 78, .18); border-color: rgba(37,120,78,.45); color: #8fe0b0; }
+.alert-danger  { background-color: rgba(160, 50, 50, .18); border-color: rgba(160,50,50,.45); color: #f0a3a3; }
 
-/* ---------- Footer ---------- */
-footer {
-  border-top: 1px solid var(--card-border);
-  background-color: var(--bg);
-  color: var(--text-muted);
+.page-title { font-weight: 600; letter-spacing: -.01em; }
+.page-sub { color: var(--text-muted); }
+
+footer { border-top: 1px solid var(--border-soft); color: var(--text-dim); }
+
+code { color: var(--accent-soft); background: rgba(201,162,39,.1); padding: .1em .35em; border-radius: 3px; }
+
+/* Badge used for field types and cardinality labels */
+.card-badge {
+  background-color: rgba(127, 178, 232, .14);
+  color: var(--link);
+  border: 1px solid rgba(127, 178, 232, .3);
+  font-weight: 500;
 }

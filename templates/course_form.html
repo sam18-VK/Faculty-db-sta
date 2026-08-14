@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% if course %}Edit Course{% else %}Add Course{% endif %}{% endblock %}
 {% block content %}
-<h2 class="mb-4">{% if course %}Edit Course{% else %}Add New Course{% endif %}</h2>
+<h2 class="page-title mb-4">{% if course %}Edit Course{% else %}Add New Course{% endif %}</h2>
 
 <form method="post" action="{{ form_action }}" class="card shadow-sm p-4">
   <div class="row g-3">

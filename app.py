@@ -35,11 +35,16 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 # persistent disk is attached, point it at e.g. /var/data/faculty.db instead.
 DATABASE = os.environ.get("DATABASE_PATH", os.path.join(BASE_DIR, "faculty.db"))
 
+# The product name stays constant while the institution using it varies, so
+# it is configuration rather than something baked into each template.
+SITE_NAME = os.environ.get("SITE_NAME", "apexdata.in")
+
 app = Flask(__name__)
 # In production set SECRET_KEY as an environment variable. The fallback below
 # exists only so the app still runs out-of-the-box during local development.
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "dev-only-insecure-key")
 app.config["DATABASE"] = DATABASE
+app.config["SITE_NAME"] = SITE_NAME
 
 DESIGNATIONS = [
     "Professor",
@@ -446,9 +451,9 @@ def login_required(view):
 
 
 @app.context_processor
-def inject_user():
-    """Make the current admin available to every template."""
-    return {"current_user": current_user()}
+def inject_globals():
+    """Make the current admin and the site name available to every template."""
+    return {"current_user": current_user(), "site_name": app.config["SITE_NAME"]}
 
 
 @app.route("/login", methods=["GET", "POST"])
