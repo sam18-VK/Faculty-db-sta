@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card shadow-sm mt-5">
+      <div class="card-body p-4">
+        <h3 class="mb-1">Administrator Sign In</h3>
+        <p class="text-muted small mb-4">Institutional Database Management System</p>
+
+        <form method="post">
+          <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" required autofocus>
+          </div>
+          <div class="mb-4">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Sign in</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-3 border-0 bg-light">
+      <div class="card-body small text-muted">
+        <strong class="d-block mb-1">Demo accounts</strong>
+        <code>admin</code> / <code>admin123</code> — Apex Institute<br>
+        <code>northadmin</code> / <code>north123</code> — Northfield College
+        <div class="mt-2">Sign in as each to see that neither can view the other's data.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

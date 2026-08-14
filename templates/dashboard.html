@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h2 class="mb-4">Dashboard</h2>
+<div class="mb-4">
+  <h2 class="mb-1">Dashboard</h2>
+  <p class="text-muted mb-0">{{ current_user.institution_name }}</p>
+</div>
 
 <div class="row g-3 mb-4">
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="card stat-card shadow-sm">
       <div class="card-body">
-        <div class="text-muted small text-uppercase">Total Faculty</div>
+        <div class="text-muted small text-uppercase">Faculty</div>
         <div class="display-6 fw-bold">{{ total_faculty }}</div>
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="card stat-card shadow-sm">
       <div class="card-body">
         <div class="text-muted small text-uppercase">Departments</div>
@@ -20,38 +23,80 @@
       </div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-3">
     <div class="card stat-card shadow-sm">
       <div class="card-body">
-        <div class="text-muted small text-uppercase">Courses Offered</div>
+        <div class="text-muted small text-uppercase">Courses</div>
         <div class="display-6 fw-bold">{{ total_courses }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small text-uppercase">Custom Data Sets</div>
+        <div class="display-6 fw-bold">{{ custom_types|length }}</div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="card shadow-sm">
-  <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
-    <span>Faculty by Department</span>
-    <a href="{{ url_for('department_list') }}" class="btn btn-sm btn-outline-secondary">Manage Departments</a>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        <span>Faculty by Department</span>
+        <a href="{{ url_for('department_list') }}" class="btn btn-sm btn-outline-secondary">Manage</a>
+      </div>
+      <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Department</th><th class="text-end">Faculty</th><th></th></tr></thead>
+        <tbody>
+          {% for dept_id, name, cnt in dept_counts %}
+          <tr>
+            <td>{{ name }}</td>
+            <td class="text-end">{{ cnt }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('faculty_list') }}?department_id={{ dept_id }}">View</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="text-center text-muted py-4">No departments yet.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
-  <div class="card-body">
-    <table class="table table-hover align-middle mb-0">
-      <thead>
-        <tr><th>Department</th><th class="text-end">Faculty Count</th><th></th></tr>
-      </thead>
-      <tbody>
-        {% for dept_id, name, cnt in dept_counts %}
-        <tr>
-          <td>{{ name }}</td>
-          <td class="text-end">{{ cnt }}</td>
-          <td class="text-end">
-            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('faculty_list') }}?department_id={{ dept_id }}">View</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
+  <div class="col-lg-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        <span>Your Custom Data Sets</span>
+        <a href="{{ url_for('type_add') }}" class="btn btn-sm btn-primary">+ New</a>
+      </div>
+      <table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Data Set</th><th class="text-end">Fields</th><th class="text-end">Records</th><th></th></tr></thead>
+        <tbody>
+          {% for t in custom_types %}
+          <tr>
+            <td class="fw-semibold">{{ t.name }}</td>
+            <td class="text-end">{{ t.field_count }}</td>
+            <td class="text-end">{{ t.record_count }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('record_list', type_id=t.type_id) }}">Open</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4" class="text-center text-muted py-4">
+            None yet — <a href="{{ url_for('type_add') }}">create your first data set</a>.
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <div class="card-footer bg-white small text-muted">
+        {{ total_relationships }} relationship(s) defined ·
+        <a href="{{ url_for('relationship_list') }}">manage</a>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

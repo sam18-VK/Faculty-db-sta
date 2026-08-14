@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Relationships{% endblock %}
+{% block content %}
+<h2 class="mb-2">Relationships</h2>
+<p class="text-muted">
+  A relationship links two data sets and fixes how many records may sit on each side.
+  The cardinality you choose is enforced whenever records are linked — not just recorded.
+</p>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr><th>Name</th><th>From → To</th><th>Cardinality</th><th class="text-end">Links</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for r in relationships %}
+            <tr>
+              <td class="fw-semibold">{{ r.name }}</td>
+              <td>{{ r.from_name }} → {{ r.to_name }}</td>
+              <td><span class="badge bg-info text-dark">{{ cardinality_labels[r.cardinality] }}</span></td>
+              <td class="text-end">{{ r.link_count }}</td>
+              <td class="text-end">
+                <form action="{{ url_for('relationship_delete', rel_id=r.rel_id) }}" method="post" class="d-inline"
+                      onsubmit="return confirm('Delete relationship {{ r.name }}? Existing links will be removed.');">
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5" class="text-center text-muted py-4">No relationships defined yet.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Define a Relationship</div>
+      {% if types|length < 1 %}
+      <div class="card-body text-muted small">
+        Create at least one data set first.
+      </div>
+      {% else %}
+      <form method="post" action="{{ url_for('relationship_add') }}" class="card-body">
+        <div class="mb-3">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-control" name="name" required placeholder="e.g. Enrolled In">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">From *</label>
+          <select class="form-select" name="from_type_id" required>
+            {% for t in types %}<option value="{{ t.type_id }}">{{ t.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">To *</label>
+          <select class="form-select" name="to_type_id" required>
+            {% for t in types %}<option value="{{ t.type_id }}">{{ t.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Cardinality *</label>
+          <select class="form-select" name="cardinality" required>
+            {% for value, label in cardinalities %}<option value="{{ value }}">{{ label }}</option>{% endfor %}
+          </select>
+          <div class="form-text">
+            <strong>1:1</strong> — each record on either side links to at most one other.<br>
+            <strong>1:N</strong> — one "from" record links to many, but each "to" record belongs to only one.<br>
+            <strong>M:N</strong> — no limit on either side.
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Create Relationship</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

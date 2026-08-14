@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ record_type.name }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <h2 class="mb-0">{{ record_type.name }}</h2>
+  <div class="text-nowrap">
+    <a href="{{ url_for('type_detail', type_id=record_type.type_id) }}" class="btn btn-outline-secondary">Design</a>
+    {% if fields %}
+    <a href="{{ url_for('record_add', type_id=record_type.type_id) }}" class="btn btn-primary">+ Add Record</a>
+    {% endif %}
+  </div>
+</div>
+<p class="text-muted">{{ record_type.description or "" }}</p>
+
+{% if not fields %}
+  <div class="alert alert-warning">
+    This data set has no fields yet.
+    <a href="{{ url_for('type_detail', type_id=record_type.type_id) }}">Add some fields</a> before entering records.
+  </div>
+{% else %}
+  <form class="row g-2 mb-3" method="get">
+    <div class="col-md-5">
+      <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="Search all fields">
+    </div>
+    <div class="col-md-2"><button class="btn btn-primary w-100" type="submit">Search</button></div>
+  </form>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            {% for f in fields %}<th>{{ f.name }}</th>{% endfor %}
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            {% for f in fields %}
+            <td>
+              {% if loop.first %}
+                <a href="{{ url_for('record_detail', type_id=record_type.type_id, record_id=row.record.record_id) }}"
+                   class="fw-semibold text-decoration-none">{{ row.vals.get(f.field_id) or "—" }}</a>
+              {% elif f.data_type == 'date' %}
+                {{ row.vals.get(f.field_id)|dateformat }}
+              {% else %}
+                {{ row.vals.get(f.field_id) or "—" }}
+              {% endif %}
+            </td>
+            {% endfor %}
+            <td class="text-end text-nowrap">
+              <a class="btn btn-sm btn-outline-secondary"
+                 href="{{ url_for('record_edit', type_id=record_type.type_id, record_id=row.record.record_id) }}">Edit</a>
+              <form action="{{ url_for('record_delete', type_id=record_type.type_id, record_id=row.record.record_id) }}"
+                    method="post" class="d-inline" onsubmit="return confirm('Delete this record?');">
+                <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="{{ fields|length + 1 }}" class="text-center text-muted py-4">
+            {% if q %}No records match "{{ q }}".{% else %}No records yet.{% endif %}
+          </td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endif %}
+{% endblock %}

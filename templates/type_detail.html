@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}{{ record_type.name }} — Design{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">{{ record_type.name }}</h2>
+    <p class="text-muted mb-0">{{ record_type.description or "No description" }}</p>
+  </div>
+  <div class="text-nowrap">
+    <a href="{{ url_for('record_list', type_id=record_type.type_id) }}" class="btn btn-outline-primary">View {{ record_count }} Record(s)</a>
+    <a href="{{ url_for('type_edit', type_id=record_type.type_id) }}" class="btn btn-outline-secondary">Rename</a>
+    <form action="{{ url_for('type_delete', type_id=record_type.type_id) }}" method="post" class="d-inline"
+          onsubmit="return confirm('Delete the entire {{ record_type.name }} data set?');">
+      <button class="btn btn-outline-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Fields</div>
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr><th>Field Name</th><th>Type</th><th>Required</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for f in fields %}
+            <tr>
+              <td class="fw-semibold">{{ f.name }}</td>
+              <td><span class="badge bg-secondary">{{ f.data_type|field_type_label }}</span></td>
+              <td>{% if f.is_required %}<span class="text-danger">Yes</span>{% else %}<span class="text-muted">No</span>{% endif %}</td>
+              <td class="text-end">
+                <form action="{{ url_for('field_delete', type_id=record_type.type_id, field_id=f.field_id) }}"
+                      method="post" class="d-inline"
+                      onsubmit="return confirm('Delete field {{ f.name }}? Any values stored in it will be lost.');">
+                  <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="4" class="text-center text-muted py-4">No fields yet — add one below.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Add a Field</div>
+      <form method="post" action="{{ url_for('field_add', type_id=record_type.type_id) }}" class="card-body">
+        <div class="mb-3">
+          <label class="form-label">Field name *</label>
+          <input type="text" class="form-control" name="name" required placeholder="e.g. Roll Number">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Data type *</label>
+          <select class="form-select" name="data_type" required>
+            {% for value, label in field_types %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" name="is_required" id="req">
+          <label class="form-check-label" for="req">Required — records can't be saved without it</label>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Add Field</button>
+      </form>
+    </div>
+
+    <div class="card shadow-sm mt-3">
+      <div class="card-header fw-semibold">Relationships</div>
+      <ul class="list-group list-group-flush">
+        {% for r in relationships %}
+        <li class="list-group-item small">
+          <strong>{{ r.name }}</strong><br>
+          {{ r.from_name }} → {{ r.to_name }}
+          <span class="badge bg-info text-dark ms-1">{{ cardinality_labels[r.cardinality] }}</span>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted small">None involving this data set.</li>
+        {% endfor %}
+      </ul>
+      <div class="card-footer bg-white">
+        <a href="{{ url_for('relationship_list') }}" class="btn btn-sm btn-outline-secondary w-100">Manage Relationships</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

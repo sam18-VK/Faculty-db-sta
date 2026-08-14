@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ record_label(record.record_id) }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">{{ record_label(record.record_id) }}</h2>
+    <span class="text-muted">{{ record_type.name }} record</span>
+  </div>
+  <div class="text-nowrap">
+    <a href="{{ url_for('record_edit', type_id=record_type.type_id, record_id=record.record_id) }}"
+       class="btn btn-outline-secondary">Edit</a>
+    <form action="{{ url_for('record_delete', type_id=record_type.type_id, record_id=record.record_id) }}"
+          method="post" class="d-inline" onsubmit="return confirm('Delete this record?');">
+      <button class="btn btn-outline-danger" type="submit">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Details</div>
+      <ul class="list-group list-group-flush">
+        {% for f in fields %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span class="text-muted">{{ f.name }}</span>
+          <span class="fw-semibold text-end">
+            {% if f.data_type == 'date' %}{{ values.get(f.field_id)|dateformat }}
+            {% else %}{{ values.get(f.field_id) or "—" }}{% endif %}
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    {% for item in outgoing %}
+    <div class="card shadow-sm mb-3">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        <span>{{ item.rel.name }} <span class="text-muted small">→ {{ item.rel.to_name }}</span></span>
+        <span class="badge bg-info text-dark">{{ cardinality_labels[item.rel.cardinality] }}</span>
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for rid in item.linked %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ record_label(rid) }}
+          <form action="{{ url_for('record_link_remove', type_id=record_type.type_id, record_id=record.record_id) }}"
+                method="post" class="d-inline">
+            <input type="hidden" name="rel_id" value="{{ item.rel.rel_id }}">
+            <input type="hidden" name="to_record_id" value="{{ rid }}">
+            <button class="btn btn-sm btn-outline-danger" type="submit">Unlink</button>
+          </form>
+        </li>
+        {% else %}
+        <li class="list-group-item text-muted small">Nothing linked yet.</li>
+        {% endfor %}
+      </ul>
+      {% if item.candidates %}
+      <form class="card-footer bg-white d-flex gap-2"
+            action="{{ url_for('record_link_add', type_id=record_type.type_id, record_id=record.record_id) }}"
+            method="post">
+        <input type="hidden" name="rel_id" value="{{ item.rel.rel_id }}">
+        <select class="form-select form-select-sm" name="to_record_id" required>
+          {% for rid in item.candidates %}
+          <option value="{{ rid }}">{{ record_label(rid) }}</option>
+          {% endfor %}
+        </select>
+        <button class="btn btn-sm btn-primary text-nowrap" type="submit">Link</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    {% if incoming %}
+    <div class="card shadow-sm">
+      <div class="card-header fw-semibold">Linked From</div>
+      <ul class="list-group list-group-flush">
+        {% for i in incoming %}
+        <li class="list-group-item small">
+          {{ record_label(i.from_record_id) }}
+          <span class="text-muted">({{ i.from_name }})</span>
+          via <strong>{{ i.rel_name }}</strong>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% if not outgoing and not incoming %}
+    <div class="card shadow-sm">
+      <div class="card-body text-muted small">
+        No relationships involve this data set yet.
+        <a href="{{ url_for('relationship_list') }}">Define one</a> to start linking records.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<a href="{{ url_for('record_list', type_id=record_type.type_id) }}" class="btn btn-link mt-3 ps-0">&larr; Back to {{ record_type.name }}</a>
+{% endblock %}

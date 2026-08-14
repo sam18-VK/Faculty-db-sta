@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{% if record %}Edit{% else %}Add{% endif %} {{ record_type.name }}{% endblock %}
+{% block content %}
+<h2 class="mb-4">{% if record %}Edit{% else %}Add{% endif %} {{ record_type.name }} Record</h2>
+
+<form method="post" action="{{ form_action }}" class="card shadow-sm p-4">
+  <div class="row g-3">
+    {% for f in fields %}
+    <div class="col-md-6">
+      <label class="form-label">
+        {{ f.name }}{% if f.is_required %} <span class="text-danger">*</span>{% endif %}
+        <span class="text-muted small">({{ f.data_type|field_type_label }})</span>
+      </label>
+
+      {% set val = values.get(f.field_id, '') %}
+      {% if f.data_type == 'longtext' %}
+        <textarea class="form-control" name="field_{{ f.field_id }}" rows="3"
+                  {% if f.is_required %}required{% endif %}>{{ val }}</textarea>
+      {% elif f.data_type == 'boolean' %}
+        <select class="form-select" name="field_{{ f.field_id }}">
+          <option value="No" {% if val == 'No' %}selected{% endif %}>No</option>
+          <option value="Yes" {% if val == 'Yes' %}selected{% endif %}>Yes</option>
+        </select>
+      {% else %}
+        {% set input_type = 'date' if f.data_type == 'date' else ('email' if f.data_type == 'email' else ('number' if f.data_type == 'number' else 'text')) %}
+        <input type="{{ input_type }}" class="form-control" name="field_{{ f.field_id }}"
+               value="{{ val }}" {% if f.is_required %}required{% endif %}
+               {% if f.data_type == 'number' %}step="any"{% endif %}>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="mt-4">
+    <button type="submit" class="btn btn-primary">{% if record %}Save Changes{% else %}Create Record{% endif %}</button>
+    <a href="{{ url_for('record_list', type_id=record_type.type_id) }}" class="btn btn-link">Cancel</a>
+  </div>
+</form>
+{% endblock %}

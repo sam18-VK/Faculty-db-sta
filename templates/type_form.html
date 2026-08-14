@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{% if record_type %}Edit Data Set{% else %}New Data Set{% endif %}{% endblock %}
+{% block content %}
+<h2 class="mb-4">{% if record_type %}Edit Data Set{% else %}Create a New Data Set{% endif %}</h2>
+
+<form method="post" action="{{ form_action }}" class="card shadow-sm p-4">
+  <div class="mb-3">
+    <label class="form-label">Name *</label>
+    <input type="text" class="form-control" name="name" required
+           value="{{ record_type.name if record_type else '' }}"
+           placeholder="e.g. Students, Alumni, Lab Equipment">
+    <div class="form-text">Use a plural noun — this names the collection of records.</div>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" name="description" rows="2">{{ record_type.description if record_type else '' }}</textarea>
+  </div>
+  <div>
+    <button type="submit" class="btn btn-primary">{% if record_type %}Save Changes{% else %}Create Data Set{% endif %}</button>
+    <a href="{{ url_for('type_list') }}" class="btn btn-link">Cancel</a>
+  </div>
+</form>
+{% endblock %}
