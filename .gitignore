@@ -5,3 +5,5 @@ venv/
 faculty.db
 .DS_Store
 *.swp
+
+.idea/

@@ -114,15 +114,24 @@ body {
 }
 .side-foot .who { color: var(--text); font-size: .88rem; font-weight: 500; }
 
-/* Collapse to a normal stacked bar on small screens */
+/* The sidebar stays vertical on the left at every width. On narrow screens it
+   only gets narrower -- it never reflows into a horizontal bar, which would
+   defeat the point of having a side navigation. */
 @media (max-width: 991.98px) {
-  .layout { flex-direction: column; }
-  .sidebar { width: 100%; flex: none; height: auto; position: static; flex-direction: column; }
-  .side-nav { display: flex; flex-wrap: wrap; gap: .25rem; }
-  .side-label { display: none; }
-  .side-link { border-left: 0; border-bottom: 2px solid transparent; }
-  .side-link.active { border-left: 0; border-bottom-color: var(--accent); }
-  .content { padding: 1.25rem; }
+  .sidebar { width: 190px; flex: 0 0 190px; }
+  .brand { padding: 1.1rem .9rem .9rem; }
+  .brand-name { font-size: 1.02rem; }
+  .side-link { font-size: .88rem; padding: .5rem .6rem; }
+  .side-foot { padding: .8rem .9rem 1rem; }
+  .content { padding: 1.4rem 1.25rem 1rem; }
+}
+
+@media (max-width: 575.98px) {
+  .sidebar { width: 150px; flex: 0 0 150px; }
+  .side-label { font-size: .62rem; padding: .7rem .5rem .3rem; }
+  .side-link { font-size: .82rem; }
+  .side-foot .inst { font-size: .7rem; }
+  .content { padding: 1rem .9rem; }
 }
 
 /* ------------------------------ Components ------------------------------ */
